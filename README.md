@@ -1,1 +1,1 @@
-# cascade-amplifier-calculator
+# Cascade Amplifier Calculator

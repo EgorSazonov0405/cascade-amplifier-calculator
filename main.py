@@ -54,3 +54,5 @@ st.image("src/second_sheme.png", caption="Схема с общей базой")
 
 st.header("Расчеты для схемы с общим коллектором")
 st.image("src/third_sheme.png", caption="Схема с общим коллектором")
+
+st.markdown("---")
