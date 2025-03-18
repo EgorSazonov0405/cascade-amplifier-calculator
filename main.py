@@ -12,6 +12,8 @@ with st.sidebar:
 
     Ik0 = col1.number_input("Ik0 (мА):", min_value=0)
     Ik0_2 = Ik0 * 10 ** (-3)
+    if Ik0_2 == 0:
+        st.error("Введите значение Ik0 != 0: ")
 
     Ib0 = col2.number_input("Ib0 (мкА):", min_value=0)
     Ib0_2 = Ib0 * 10 ** (-6)
@@ -43,6 +45,10 @@ st.markdown("---")
 st.header("Y параметры транзистора")
 
 col1, col2 = st.columns(2)
+y11 = 0
+y12 = 0
+y21 = 0
+y22 = 0
 
 # Расчет y параметров
 if Ube == 0:
@@ -71,30 +77,38 @@ else:
     y22 = Ik_2 / Uke
     col2.success(f"Параметр y22: {y22: ,.3f}")
     st.success(f"Параметр g: {y22: ,.3f}")
-
-Y_matrix_determinant = (y11 * y22) - (y21 * y12)
-st.success(f"Определитель матрицы Y параметров: {Y_matrix_determinant}")
-
+if y11 != 0 and y12 != 0 and y21 != 0 and y22 != 0:
+    Y_matrix_determinant = (y11 * y22) - (y21 * y12)
+    st.success(f"Определитель матрицы Y параметров: {Y_matrix_determinant}")
+else:
+    st.error(f"Для расчета определителя матрицы Y параметров необходимо сначала рассчитать Y параметры. Введите исходные данные для расчета")
 st.markdown("---")
 
-Y_matrix_determinant = (y11 * y22) - (y21 * y12)
 # Схема с общим эмиттером
 st.header("Расчеты для схемы с общим эмиттером")
 col1, col2 = st.columns(2)
 col2.image("src/first_sheme.png", caption="Схема с общим эмиттером")
 Rem_out = supply_voltage/(2*Ik0_2*9)
 Rem = col1.success(f"Rem: {Rem_out:,.3f}")
-Rk = col1.success(f"Rk: {(Rem*8):,.3f}")
-Uem = col1.success(f"Uem: {(Rem*Ik0_2):,.3f}")
-U_base = col1.success(f"Ub: {Uem + Ube0}:,.3f")
-R2_out = (U_base/(current_ratio * Ib0_2))
-R2 = col1.success(f"R2: {R2_out:,.3f}")
-R1_out = (supply_voltage/(current_ratio * Ib0_2)) - R2
-R1 = col1. success(f"R1: {R1_out:,.3f}")
-Y_load_hatch = col1.success(f"Yн: {(1 / Rk + 1 / load_resistance): ,.3f}")
-Y_gen_hatch = col1.success(f"Yг: {(1 / source_resistance + 1 / R1 + 1 / R2):, .3f}")
-Y_input = col1.success(f"Yвх: {(Y_matrix_determinant + y11 * Y_load_hatch) / (y22 + Y_load_hatch): ,.3f}")
-Y_output = col1.success(f"Yвых: {(Y_matrix_determinant + y22 * Y_gen_hatch) / (y11 + Y_gen_hatch): ,.3f}")
+Rk_out = Rem_out*8
+Rk = col1.success(f"Rk: {Rk_out:,.3f}")
+Uem_out = Rem_out*Ik0_2
+Uem = col1.success(f"Uem: {Uem_out:,.3f}")
+U_base_out = Uem_out + Ube0
+U_base = col1.success(f"Ub: {U_base_out:,.3f}")
+R2_out = (U_base_out/(current_ratio * Ib0_2))
+R2 = st.success(f"R2: {R2_out:,.3f}")
+R1_out = (supply_voltage/(current_ratio * Ib0_2)) - R2_out
+if R1_out >= 0:
+    R1 = st. success(f"R1: {R1_out:,.3f}")
+else:
+    st.error("Проверьте корректность введенных данных")
+Y_load_hatch_out = 1 / Rk_out + 1 / load_resistance
+Y_load_hatch = st.success(f"Yн: {Y_load_hatch_out: ,.3f}")
+Y_gen_hatch_out = 1 / source_resistance + 1 / R1_out + 1 / R2_out
+Y_gen_hatch = st.success(f"Yг: {Y_gen_hatch_out: ,.3f}")
+Y_input = st.success(f"Yвх: {(Y_matrix_determinant + y11 * Y_load_hatch_out) / (y22 + Y_load_hatch_out): ,.3f}")
+Y_output = st.success(f"Yвых: {(Y_matrix_determinant + y22 * Y_gen_hatch_out) / (y11 + Y_gen_hatch_out): ,.3f}")
 st.markdown("---")
 
 # Схема с общей базой
